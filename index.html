@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Quiz App - Upgraded</title>
+
+    <style> 
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #667eea, #764ba2); 
+      height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      margin: 0; 
+    } 
+    .quiz-container { 
+      background: #fff; 
+      width: 500px; 
+      padding: 30px; 
+      border-radius: 15px; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+      text-align: center; 
+    } 
+    .quiz-header { 
+      margin-bottom: 20px; 
+    } 
+    h2 { 
+      color: #333; 
+      margin-bottom: 15px; 
+    } 
+    .progress-bar { 
+      background: #eee; 
+      border-radius: 10px; 
+      overflow: hidden; 
+      margin-bottom: 20px; 
+    } 
+    .progress { 
+      height: 10px; 
+      width: 0%; 
+      background: #667eea; 
+      transition: width 0.3s ease; 
+    } 
+    .timer { 
+      font-size: 16px; 
+      margin-bottom: 15px; 
+      color: #555; 
+    } 
+    .option { 
+      background: #f4f4f9; 
+      border: 2px solid transparent; 
+      padding: 12px; 
+      margin: 10px 0; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+    } 
+    .option:hover { 
+      background: #e0e0ff; 
+    } 
+    .option.selected { 
+      border-color: #667eea; 
+      background: #dcdcff; 
+    } 
+    button { 
+      margin-top: 20px; 
+      padding: 12px 25px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      background: #667eea; 
+      color: white; 
+      transition: background 0.3s; 
+    } 
+    button:hover { 
+      background: #5a67d8; 
+    } 
+    .result { 
+      font-size: 20px; 
+      font-weight: bold; 
+      color: #333; 
+    } 
+  </style>
+</head>
+<body>
+    
+    <div class="quiz-container">
+        <div class="header">
+            <h2 id="question">Question text</h2>
+        </div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>    
+        <div class="timer">⏱ Time left: <span id="time">10</span></div>
+        <div id="options"></div>
+
+        <button onclick="nextQuestion()">Next</button>
+        <div id="result"></div>
+    </div>
+         
+    <Script>
+            const questionsOriginal = [ 
+      { 
+        question: "What is 2 + 2?", 
+        options: ["3", "4", "5", "6"], 
+        answer: "4" 
+      }, 
+      { 
+        question: "Which language runs in a web browser?", 
+        options: ["Java", "C", "Python", "JavaScript"], 
+        answer: "JavaScript" 
+      }, 
+      { 
+        question: "What does CSS stand for?", 
+        options: [ 
+          "Central Style Sheets", 
+          "Cascading Style Sheets", 
+          "Computer Style System", 
+          "Colorful Style Syntax" 
+        ], 
+        answer: "Cascading Style Sheets" 
+      }, 
+      { 
+        question: "Inside which HTML element do we put JavaScript?", 
+        options: ["<script>", "<js>", "<javascript>", "<code>"], 
+        answer: "<script>" 
+      } 
+    ]; 
+
+    let questions = [...questionsOriginal]; 
+    shuffleArray(questions); 
+ 
+    let currentIndex = 0; 
+    let score = 0; 
+    let selectedAnswer = ""; 
+    let timer; 
+    let timeLeft = 10; 
+ 
+    function loadQuestion() { 
+      clearInterval(timer); 
+      timeLeft = 10; 
+      document.getElementById("time").innerText = timeLeft; 
+      timer = setInterval(updateTimer, 1000); 
+ 
+      const currentQuestion = questions[currentIndex]; 
+      document.getElementById("question").innerText = currentQuestion.question; 
+ 
+      const optionsDiv = document.getElementById("options"); 
+      optionsDiv.innerHTML = ""; 
+ 
+      // Shuffle options for each question 
+      const shuffledOptions = [...currentQuestion.options]; 
+      shuffleArray(shuffledOptions); 
+ 
+      shuffledOptions.forEach(option => { 
+        const div = document.createElement("div"); 
+        div.innerText = option; 
+        div.classList.add("option"); 
+        div.onclick = () => selectAnswer(div, option); 
+        optionsDiv.appendChild(div); 
+      }); 
+ 
+      updateProgress(); 
+      document.getElementById("result").innerText = ""; 
+    } 
+ 
+    function updateTimer() { 
+      timeLeft--; 
+      document.getElementById("time").innerText = timeLeft; 
+      if (timeLeft <= 0) { 
+        clearInterval(timer); 
+        nextQuestion(); 
+      } 
+    } 
+ 
+    function selectAnswer(element, answer) { 
+      const options = document.querySelectorAll(".option"); 
+      options.forEach(opt => opt.classList.remove("selected")); 
+      element.classList.add("selected"); 
+      selectedAnswer = answer; 
+    } 
+ 
+    function nextQuestion() { 
+      clearInterval(timer); 
+      if (selectedAnswer === questions[currentIndex].answer) { 
+        score++; 
+      } 
+      currentIndex++; 
+      selectedAnswer = ""; 
+ 
+      if (currentIndex < questions.length) { 
+        loadQuestion(); 
+      } else { 
+        endQuiz(); 
+      } 
+    } 
+ 
+    function updateProgress() { 
+      const progress = ((currentIndex + 1) / questions.length) * 100; 
+      document.getElementById("progress").style.width = progress + "%"; 
+    } 
+ 
+    function endQuiz() { 
+      document.querySelector(".quiz-container").innerHTML = ` 
+        <h2>Quiz Completed �s</h2> 
+        <p class="result">Your Score: ${score} / ${questions.length}</p> 
+        <button onclick="restartQuiz()">Restart Quiz</button> 
+      `; 
+    } 
+ 
+    function restartQuiz() { 
+      currentIndex = 0; 
+      score = 0; 
+      selectedAnswer = ""; 
+      questions = [...questionsOriginal]; 
+      shuffleArray(questions); 
+      document.querySelector(".quiz-container").innerHTML = ` 
+        <div class="quiz-header"> 
+          <h2 id="question">Question text</h2> 
+        </div> 
+        <div class="progress-bar"> 
+          <div class="progress" id="progress"></div> 
+        </div> 
+        <div class="timer">⏱ Time left: <span id="time">10</span>s</div> 
+        <div id="options"></div> 
+        <button onclick="nextQuestion()">Next</button> 
+        <div id="result"></div> 
+      `; 
+      loadQuestion(); 
+    } 
+ 
+    function shuffleArray(array) { 
+      for (let i = array.length - 1; i > 0; i--) { 
+        const j = Math.floor(Math.random() * (i + 1)); 
+        [array[i], array[j]] = [array[j], array[i]]; 
+      } 
+    } 
+ 
+    loadQuestion(); 
+</script> 
+</body> 
+</html>
